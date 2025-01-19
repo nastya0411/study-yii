@@ -9,6 +9,9 @@ use yii\web\Response;
 use yii\filters\VerbFilter;
 use app\models\LoginForm;
 use app\models\ContactForm;
+use app\models\RegisterForm;
+
+use function Psy\debug;
 
 class SiteController extends Controller
 {
@@ -77,6 +80,7 @@ class SiteController extends Controller
 
         $model = new LoginForm();
         if ($model->load(Yii::$app->request->post()) && $model->login()) {
+            Yii::$app ->session->setFlash('success','Пользователь успешно авторизован!');
             return $this->goBack();
         }
 
@@ -105,7 +109,7 @@ class SiteController extends Controller
      */
     public function actionContact()
     {
-        $model = new ContactForm();
+        $model = new RegisterForm();
         if ($model->load(Yii::$app->request->post()) && $model->contact(Yii::$app->params['adminEmail'])) {
             Yii::$app->session->setFlash('contactFormSubmitted');
 
@@ -124,5 +128,31 @@ class SiteController extends Controller
     public function actionAbout()
     {
         return $this->render('about');
+    }
+
+    public function actionRegisterd()
+    {
+        return $this->render('index');
+    }
+
+    public function actionRegister() 
+    { 
+        $model = new \app\models\RegisterForm(); 
+        if ($model->load(Yii::$app->request->post())) { 
+
+            if ($user = $model -> userRegister()){
+                Yii::$app->user->login($user);
+                Yii::$app ->session->setFlash('success','Пользователь успешно зарегистрирован!');
+                return $this -> redirect('/');
+                //Yii::debug($user->attributes);
+            }
+
+
+            if (true) { 
+               // var_dump('ok'); die; 
+               Yii::debug('ok');
+            } 
+        } 
+        return $this->render('register', [ 'model' => $model, ]); 
     }
 }
